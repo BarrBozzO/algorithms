@@ -11,19 +11,29 @@ class UnionFind {
   }
 
   union(a: number, b: number) {
-    const nextParent = this.nodes[a];
-    const currentParent = this.nodes[b];
-    this.nodes.forEach((_, index) => {
-      if (this.nodes[index] === currentParent) this.nodes[index] = nextParent;
-    });
+    const aRoot = this.find(a);
+    const bRoot = this.find(b);
+
+    // this.nodes.forEach((_, index) => {
+    //   if (this.nodes[index] === currentParent) this.nodes[index] = nextParent;
+    // });
+
+    this.nodes[aRoot] = bRoot;
 
     console.dir(this.nodes);
   }
 
-  find(a: number) {}
+  private find(a: number) {
+    let inputA = a;
+    while (inputA !== this.nodes[inputA]) {
+      inputA = this.nodes[inputA];
+    }
+
+    return inputA;
+  }
 
   isConnected(a: number, b: number): boolean {
-    return this.nodes[a] === this.nodes[b];
+    return this.find(this.nodes[a]) === this.find(this.nodes[b]);
   }
 }
 
@@ -36,4 +46,4 @@ UF.union(2, 1);
 UF.union(0, 8);
 UF.union(0, 9);
 
-console.log(UF.isConnected(0, 7));
+console.log(UF.isConnected(6, 4));
