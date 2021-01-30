@@ -1,13 +1,14 @@
 class UnionFind {
   private count: number;
-  private nodes: number[] = [];
-  private sizes: number[] = [];
+  private nodeRoots: number[] = [];
+  private ranks: number[] = [];
 
   constructor(n: number) {
     this.count = n;
 
     for (let nodeId = 0; nodeId < this.count; nodeId++) {
-      this.nodes.push(nodeId);
+      this.nodeRoots.push(nodeId);
+      this.ranks.push(0);
     }
   }
 
@@ -15,48 +16,44 @@ class UnionFind {
     const aRoot = this.find(a);
     const bRoot = this.find(b);
 
-    // this.nodes.forEach((_, index) => {
-    //   if (this.nodes[index] === currentParent) this.nodes[index] = nextParent;
-    // });
-    const aSize = this.sizes[aRoot] || 0;
-    const bSize = this.sizes[bRoot] || 0;
-    const sizeSum = aSize + bSize;
     if (aRoot === bRoot) return;
-    else if (aSize < bSize) {
-      this.nodes[aRoot] = bRoot;
-      this.sizes[bRoot] += sizeSum;
+
+    if (this.ranks[aRoot] < this.ranks[bRoot]) {
+      this.nodeRoots[aRoot] = bRoot;
     } else {
-      this.nodes[bRoot] = aRoot;
-      this.sizes[aRoot] += sizeSum;
+      this.nodeRoots[bRoot] = aRoot;
+      if (this.ranks[aRoot] === this.ranks[bRoot]) this.ranks[aRoot] += 1;
     }
 
-    // console.dir(this.nodes);
-    console.dir(this.sizes);
+    // console.dir(this.nodeRoots);
+    console.dir(this.ranks);
   }
 
   private find(a: number) {
-    let inputA = a;
-    while (inputA !== this.nodes[inputA]) {
-      inputA = this.nodes[inputA];
+    let rootNode = a;
+
+    while (rootNode !== this.nodeRoots[rootNode]) {
+      this.nodeRoots[rootNode] = this.nodeRoots[this.nodeRoots[rootNode]];
+      rootNode = this.nodeRoots[rootNode];
     }
-    return inputA;
+    return rootNode;
   }
 
   isConnected(a: number, b: number): boolean {
-    return this.find(this.nodes[a]) === this.find(this.nodes[b]);
+    return this.find(this.nodeRoots[a]) === this.find(this.nodeRoots[b]);
   }
 }
 
 const UF = new UnionFind(10);
 
 UF.union(4, 3);
-UF.union(4, 8);
-UF.union(4, 9);
-UF.union(6, 0);
+UF.union(5, 8);
+UF.union(2, 9);
+UF.union(6, 1);
 UF.union(6, 2);
-UF.union(6, 5);
-UF.union(2, 1);
-UF.union(2, 7);
+UF.union(7, 5);
+UF.union(2, 9);
+UF.union(9, 7);
 UF.union(6, 4);
 
-console.log(UF.isConnected(6, 4));
+console.log(UF.isConnected(9, 3));
