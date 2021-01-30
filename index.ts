@@ -1,59 +1,64 @@
-class UnionFind {
-  private count: number;
-  private nodeRoots: number[] = [];
-  private ranks: number[] = [];
+import UnionFind from "./union-find";
 
-  constructor(n: number) {
-    this.count = n;
+// Dynamic connectivity percolation
+const system = [
+  ...[1, 0, 1, 1, 0],
+  ...[1, 1, 0, 0, 0],
+  ...[0, 1, 0, 1, 1],
+  ...[0, 1, 0, 1, 1],
+  ...[0, 0, 1, 1, 0],
+];
+const size = 5;
 
-    for (let nodeId = 0; nodeId < this.count; nodeId++) {
-      this.nodeRoots.push(nodeId);
-      this.ranks.push(0);
-    }
-  }
-
-  union(a: number, b: number) {
-    const aRoot = this.find(a);
-    const bRoot = this.find(b);
-
-    if (aRoot === bRoot) return;
-
-    if (this.ranks[aRoot] < this.ranks[bRoot]) {
-      this.nodeRoots[aRoot] = bRoot;
-    } else {
-      this.nodeRoots[bRoot] = aRoot;
-      if (this.ranks[aRoot] === this.ranks[bRoot]) this.ranks[aRoot] += 1;
-    }
-
-    // console.dir(this.nodeRoots);
-    console.dir(this.ranks);
-  }
-
-  private find(a: number) {
-    let rootNode = a;
-
-    while (rootNode !== this.nodeRoots[rootNode]) {
-      this.nodeRoots[rootNode] = this.nodeRoots[this.nodeRoots[rootNode]];
-      rootNode = this.nodeRoots[rootNode];
-    }
-    return rootNode;
-  }
-
-  isConnected(a: number, b: number): boolean {
-    return this.find(this.nodeRoots[a]) === this.find(this.nodeRoots[b]);
+// console output
+let output = "";
+for (let i = 0; i < Math.pow(size, 2); i++) {
+  output += ` ${Boolean(system[i]) ? "x" : "-"} `;
+  if (i > 0 && (i + 1) % size === 0) {
+    console.log(output);
+    output = "";
   }
 }
 
-const UF = new UnionFind(10);
+const UF = new UnionFind(system.length + 2); // + 2 for bottom/top nodes
+// union
+const topNode = system.length + 1;
+const bottomNode = topNode + 1;
 
-UF.union(4, 3);
-UF.union(5, 8);
-UF.union(2, 9);
-UF.union(6, 1);
-UF.union(6, 2);
-UF.union(7, 5);
-UF.union(2, 9);
-UF.union(9, 7);
-UF.union(6, 4);
+for (let i = 0; i < system.length; i++) {
+  const siteOpened = system[i];
 
-console.log(UF.isConnected(9, 3));
+  if (siteOpened) {
+    if (i < size) {
+      // top row
+      UF.union(i, topNode);
+    }
+
+    if (Boolean(system[i - 1]) && i % size !== 0) {
+      // left site
+      UF.union(i - 1, i);
+    }
+
+    if (Boolean(system[i + 1]) && (i + 1) % size !== 0) {
+      // right site
+      UF.union(i + 1, i);
+    }
+
+    if (Boolean(system[i - size])) {
+      // top site
+      UF.union(i - size, i);
+    }
+
+    if (Boolean(system[i + size])) {
+      // bottom site
+      UF.union(i + size, i);
+    }
+
+    if (i > system.length - size) {
+      // bottom row
+      UF.union(i, bottomNode);
+    }
+  }
+}
+
+console.log(UF.isConnected(topNode, bottomNode));
